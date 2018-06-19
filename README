@@ -1,0 +1,87 @@
+Suppose you have a single system & you would want to access 2 github accounts one that is personal & other for work purpose, don't worry, just sit back & follow the process below. I will be creating 2 scenarios, basically what I did on my Mac.
+
+Scene 1:
+
+	1. Open your terminal & proceed to your home or root directory.
+		a. Here type the cmd ls -lia or ls -la , this will list out all the files including those that aren't visible from the command ls or ls -l.
+	2. Now cd .ssh
+		a. Then ls -la.
+		b. You can see a list of files like:
+			i. Id_rsa
+			ii. Id_rsa.pub
+			iii. Known_hosts
+		Etc etc etc 
+	3. If you are already accessing one of your github account from your system, then the file id_rsa.pub ssh file is already present in your github account. So you obviously can't use this key in the other github account.
+	4. So now in order for you to use a new account, you will need to have another ssh key to access the other github account. Complete the following process to have access to your second account.
+		a. First you will have to create a new ssh key & store it in a different file & name. To create a new ssh key type ssh-keygen -t rsa -C "your email"
+		b. Now save this with a new name & provide the path Ex: /Users/rex/.ssh/id_rsa_Ofc or /Users/rex/.ssh/id_rsa_Personal . Remember do not overwrite the existing id_rsa file as u r already using it with one account.
+		c. Next, it will prompt u for a passpharse, let it be blank(best not to modify it). Press enter twice.
+		d. Now you can verify it using ls -la, 2 files will be created one with the name u have given ->  "id_rsa_work" (in my case) & "id_rsa_work.pub" 
+	5. Now log into your second github account & goto settings -> SSH Key -> New SSH Key 
+		a. Now in your terminal, type vim id_rsa_work.pub, copy everything & paste in your github account that you opened in your browser. Give a title & add the key.
+	6. Since we saved it as a unique, we need to inform ssh about this. So let's see how to do this
+		a. Type in the cmd:- ssh-add ~/.ssh/id_rsa_work & press enter, identity will be added.
+	7. We need a way to specify when we wanna push to our personal account or to our work account
+		a. Goto to your .ssh folder in your terminal & type touch config
+		b. Now open the file to write the following: cmd: vim config
+		c. Write the following
+			Host GitPersonal
+				HostName github.com
+				User git
+				IdentityFile /Users/rex/.ssh/id_rsa
+			Host GitWork
+				HostName github.com
+				User git
+				IdentityFile /Users/rex/.ssh/id_rsa_work
+		d. You can see that the HostName & User are same for both. Only the IdentityFile varies. Save the file.
+	8. To test the above:
+		a. Restart your terminal
+		b. Navigate to the folder where you want to start testing & create a folder
+			i. Mkdir test
+			ii. Cd test
+			iii. Touch readme.txt
+			iv. Vim readme.txt
+				1) Hello There
+				2) Esc :wq -> to save the file & exit
+			v. Will push this to my work account:- git init
+			vi. Git add .
+			vii. Git commit -m "testing with work account"
+			viii. Open github on your browser & login with your work account -> Create a repository "testing"
+			ix. Now there will be slight changes in the way we work, since we have multiple github accounts
+				1) Git remote add origin git@GitWork:rex/testing.git
+					a) The GitWork  is the name we in our step 7.c 
+					b) The :rex/testing.git can be found on the page where u created the repository in your github under EXISTING GIT REPO section
+				2) Git push -u origin master
+			x. If you managed to get all these steps right, then these changes should be present in your work github account, goto your browser & refresh it.
+			xi. You should be able to see readme.txt file
+		c. Finale step is to make sure you can still push to your personal account
+			i. How to do this follow below:
+				1) Rm -rf .git
+				2) Git init
+				3) Git add .
+				4) Git status (just to check the status)
+				5) Git commit -m "personal account test"
+				6) Git log (to check the latest commit)
+				7) Now login into your personal account
+				8) Create a new repositiory "testingPersonal"
+				9) Git remote add origin git@GitPersonal:rex/testingPersonal.git (refer 7.c)
+				10) Git push origin master.
+			ii. If managed to get these steps right, your will be able to see the readme.txt file in your personal account.
+
+Scene 2:
+
+	1. Suppose you have configured your email using git config --global user.email (which in my case I have), anything that you follow from the above scenario you will be pushing from the global email id you have registered. Even though you do git remote add origin git@GitWork:rex/testing.git, you will push to your work account but the email id associated with the push or the commit will be that of your personal account.
+	2. So inorder to avoid this, its better you don’t fo the global config.
+	3. But if you have done that already, well see below for the solution:
+		a. Change your user.email in the global to config to your work email : cmd: git config --global user.email "work email"
+		b. Go to the folder where you want to initialize git & commit: 
+			i. Follow step 8.c from Scenario 1
+		c.  Suppose now you want to use ur personal account
+			i. Git config --global user.email "personal email"
+			ii. Follow step 8.c from Scenario 1
+	
+
+Well That’s the end.
+				
+			
+
